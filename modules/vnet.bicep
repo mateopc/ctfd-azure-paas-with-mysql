@@ -34,6 +34,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
         properties: {
           addressPrefix: internalResourcesSubnetCIDR
           privateEndpointNetworkPolicies: 'Disabled'
+          delegations: [
+                {
+                  name: 'MySQLflexibleServers'
+                  properties: {
+                    serviceName: 'Microsoft.DBforMySQL/flexibleServers'
+                  }
+                }
+              ]
         }
       }
       {
