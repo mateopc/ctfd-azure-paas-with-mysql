@@ -39,16 +39,6 @@ param administratorLogin string = 'ctfd'
 @secure()
 param administratorLoginPassword string
 
-@description('Database vCores count')
-@allowed([
-  2
-  4
-  8
-  16
-  32
-])
-param databaseVCores int = 2
-
 @description('App Service Plan SKU name')
 @allowed([
   'B1'
@@ -196,7 +186,6 @@ module mySQLModule 'modules/mysql.bicep' = {
     vnet: vnet
     ctfDbSecretName: ctfDatabaseSecretName
     keyVaultName: akvModule.outputs.keyVaultName
-    databaseVCores: databaseVCores
     logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
   }
 }
