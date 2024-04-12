@@ -198,7 +198,5 @@ module mySQLModule 'modules/mysql.bicep' = {
     keyVaultName: akvModule.outputs.keyVaultName
     databaseVCores: databaseVCores
     logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
-    virtualNetworkCIDR: virtualNetworkCIDR
-    publicResourcesSubnetCIDR: publicResourcesSubnetCIDR
   }
 }
