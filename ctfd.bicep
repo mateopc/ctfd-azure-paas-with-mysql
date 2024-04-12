@@ -184,9 +184,9 @@ module redisModule 'modules/redis.bicep' = {
   }
 }
 
-@description('Deploys Azure Database for MariaDB and a Key Vault secret with its connection string')
-module mariaDbModule 'modules/mariadb.bicep' = {
-  name: 'mariaDbDeploy'
+@description('Deploys Azure Database for MySQL and a Key Vault secret with its connection string')
+module mySQLModule 'modules/mysql.bicep' = {
+  name: 'mySQLDeploy'
   params: {
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
