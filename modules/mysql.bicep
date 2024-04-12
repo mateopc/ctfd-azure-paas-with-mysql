@@ -13,12 +13,6 @@ param administratorLogin string
 @secure()
 param administratorLoginPassword string
 
-@description('CIDR of the virtual network')
-param virtualNetworkCIDR string
-
-@description('CIDR of the public resources subnet')
-param publicResourcesSubnetCIDR string
-
 @description('Provide the tier of the specific SKU. High availability is available only in the GeneralPurpose and MemoryOptimized SKUs.')
 @allowed([
   'Burstable'
@@ -34,7 +28,7 @@ param serverEdition string = 'Burstable'
 ])
 param serverVersion string = '8.0.21'
 
-@description('The availability zone information for the server. (If you don't have a preference, leave blank.)')
+@description('The availability zone information for the server.')
 param availabilityZone string = '1'
 
 @description('Provide the high availability mode for a server: Disabled, SameZone, or ZoneRedundant.')
