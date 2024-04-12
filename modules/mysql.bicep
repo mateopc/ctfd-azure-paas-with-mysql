@@ -10,8 +10,11 @@ param administratorLogin string
 @secure()
 param administratorLoginPassword string
 
-@description('Database vCores count')
-param databaseVCores int
+@description('CIDR of the virtual network')
+param virtualNetworkCIDR string
+
+@description('CIDR of the public resources subnet')
+param publicResourcesSubnetCIDR string
 
 @description('Name of the VNet')
 param virtualNetworkName string
