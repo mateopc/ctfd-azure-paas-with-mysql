@@ -1,6 +1,9 @@
 @description('Deploy in VNet')
 param vnet bool
 
+@description('Location for all resources.')
+param location string
+
 @description('Database administrator login name')
 @minLength(1)
 param administratorLogin string
@@ -16,6 +19,59 @@ param virtualNetworkCIDR string
 @description('CIDR of the public resources subnet')
 param publicResourcesSubnetCIDR string
 
+@description('Provide the tier of the specific SKU. High availability is available only in the GeneralPurpose and MemoryOptimized SKUs.')
+@allowed([
+  'Burstable'
+  'Generalpurpose'
+  'MemoryOptimized'
+])
+param serverEdition string = 'Burstable'
+
+@description('Provide Server version')
+@allowed([
+  '5.7'
+  '8.0.21'
+])
+param serverVersion string = '8.0.21'
+
+@description('The availability zone information for the server. (If you don't have a preference, leave blank.)')
+param availabilityZone string = '1'
+
+@description('Provide the high availability mode for a server: Disabled, SameZone, or ZoneRedundant.')
+@allowed([
+  'Disabled'
+  'SameZone'
+  'ZoneRedundant'
+])
+param haEnabled string = 'Disabled'
+
+@description('Provide the availability zone of the standby server.')
+param standbyAvailabilityZone string = '2'
+
+param storageSizeGB int = 20
+param storageIops int = 360
+@allowed([
+  'Enabled'
+  'Disabled'
+])
+param storageAutogrow string = 'Enabled'
+
+@description('The name of the sku, e.g. Standard_D32ds_v4.')
+param skuName string = 'Standard_B1ms'
+
+param backupRetentionDays int = 7
+@allowed([
+  'Disabled'
+  'Enabled'
+])
+param geoRedundantBackup string = 'Disabled'
+
+@description('Server Name for Azure database for MySQL')
+var serverName = 'ctfd-mysqlserver-${uniqueString(resourceGroup().id)}'
+
+@description('Database Name for Azure database for MySQL')
+var databaseName = 'ctfd-mysqldb-${uniqueString(resourceGroup().id)}'
+
 @description('Name of the VNet')
 param virtualNetworkName string
 
@@ -28,88 +84,74 @@ param keyVaultName string
 @description('Name of the connection string secret')
 param ctfDbSecretName string
 
-@description('Location for all resources.')
-param location string
-
 @description('Log Anaytics Workspace Id')
 param logAnalyticsWorkspaceId string
 
-@description('Server Name for Azure database for MariaDB')
-var mariaServerName = 'ctfd-mariadb-${uniqueString(resourceGroup().id)}'
-
-resource mariaDbServer 'Microsoft.DBforMariaDB/servers@2018-06-01' = {
-  name: mariaServerName
+resource server 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
   location: location
+  name: serverName
   sku: {
-    name: 'GP_Gen5_${databaseVCores}'
-    size: '5120'
+    name: skuName
+    tier: serverEdition
   }
   properties: {
-    createMode: 'Default'
-    version: '10.3'
+    version: serverVersion
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    publicNetworkAccess: (vnet ? 'Disabled' : 'Enabled')
-  }
-
-  resource mariadbconfig_char_set 'configurations@2018-06-01' = {
-    name: 'character_set_server'
-    properties: {
-      source: 'user-override'
-      value: 'utf8mb4'
+    availabilityZone: availabilityZone
+    highAvailability: {
+      mode: haEnabled
+      standbyAvailabilityZone: standbyAvailabilityZone
     }
-  }
-
-  resource mariadbconfig_coallation 'configurations@2018-06-01' = {
-    name: 'collation_server'
-    properties: {
-      source: 'user-override'
-      value: 'utf8mb4_unicode_ci'
+    storage: {
+      storageSizeGB: storageSizeGB
+      iops: storageIops
+      autoGrow: storageAutogrow
     }
-  }
-
-  resource mariadbconfig_wait_timeout 'configurations@2018-06-01' = {
-    name: 'wait_timeout'
-    properties: {
-      source: 'user-override'
-      value: '28800'
+    network: {
+      delegatedSubnetResourceId: subnet.id //
     }
-  }
-
-  resource allowAllWindowsAzureIps 'firewallRules@2018-06-01' = if (!vnet) {
-    name: 'AllowAllWindowsAzureIps'
-    properties: {
-      startIpAddress: '0.0.0.0'
-      endIpAddress: '0.0.0.0'
+    backup: {
+      backupRetentionDays: backupRetentionDays
+      geoRedundantBackup: geoRedundantBackup
     }
   }
 }
 
+resource database 'Microsoft.DBforMySQL/flexibleServers/databases@2021-12-01-preview' = {
+  parent: server
+  name: databaseName
+  properties: {
+    charset: 'utf8mb4'
+    collation: 'utf8mb4_general_ci'
+  }
+}
+
 module privateEndpointModule 'privateendpoint.bicep' = if (vnet) {
-  name: 'mariaDbPrivateEndpointDeploy'
+  name: 'MySQLPrivateEndpointDeploy'
   params: {
     virtualNetworkName: virtualNetworkName
     subnetName: internalResourcesSubnetName
-    resuorceId: mariaDbServer.id
-    resuorceGroupId: 'mariadbServer'
-    privateDnsZoneName: 'privatelink.mariadb.database.azure.com'
-    privateEndpointName: 'mariadb_private_endpoint'
+    resuorceId: server.id
+    resuorceGroupId: 'mySQLServer'
+    privateDnsZoneName: 'privatelink.mysql.database.azure.com'
+    privateEndpointName: 'mysql_private_endpoint'
     location: location
   }
 }
 
 module cacheSecret 'keyvaultsecret.bicep' = {
-  name: 'mariaDbKeyDeploy'
+  name: 'MySQLKeyDeploy'
   params: {
     keyVaultName: keyVaultName
     secretName: ctfDbSecretName
-    secretValue: 'mysql+pymysql://${administratorLogin}@${mariaServerName}:${administratorLoginPassword}@${mariaServerName}.mariadb.database.azure.com/ctfd?ssl_ca=/opt/certificates/DigiCertGlobalRootG2.crt.pem'
+    secretValue: 'mysql+pymysql://${administratorLogin}@${serverName}:${administratorLoginPassword}@${serverName}.mysql.database.azure.com/ctfd?ssl_ca=/opt/certificates/DigiCertGlobalRootCA.crt.pem'
   }
 }
 
 resource diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: '${mariaServerName}-diagnostics'
-  scope: mariaDbServer
+  name: '${serverName}-diagnostics'
+  scope: server
   properties: {
     logs: [
       {
