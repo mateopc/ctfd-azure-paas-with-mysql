@@ -1,6 +1,12 @@
 @description('Location for all resources.')
 param resourcesLocation string = resourceGroup().location
 
+@description('CIDR of the virtual network')
+param virtualNetworkCIDR string = '10.200.0.0/16'
+
+@description('CIDR of the public resources subnet')
+param publicResourcesSubnetCIDR string = '10.200.1.0/26'
+
 @description('Deploy with VNet')
 param vnet bool = true
 
@@ -119,6 +125,9 @@ module vnetModule 'modules/vnet.bicep' = if (vnet) {
     virtualNetworkName: virtualNetworkName
     internalResourcesSubnetName: internalResourcesSubnetName
     publicResourcesSubnetName: publicResourcesSubnetName
+    virtualNetworkCIDR: virtualNetworkCIDR
+    publicResourcesSubnetCIDR: publicResourcesSubnetCIDR
+    
   }
 }
 
@@ -189,5 +198,7 @@ module mariaDbModule 'modules/mariadb.bicep' = {
     keyVaultName: akvModule.outputs.keyVaultName
     databaseVCores: databaseVCores
     logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
+    virtualNetworkCIDR: virtualNetworkCIDR
+    publicResourcesSubnetCIDR: publicResourcesSubnetCIDR
   }
 }
