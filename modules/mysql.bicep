@@ -100,6 +100,7 @@ resource server 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
     tier: serverEdition
   }
   properties: {
+    createMode: 'Default'
     version: serverVersion
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
