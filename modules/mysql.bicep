@@ -72,10 +72,10 @@ param virtualNetworkName string
 @description('Name of the internal resources subnet')
 param internalResourcesSubnetName string
 
-@description('Reference to existing subnet created in vnet.bicep')
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
-  name: internalResourcesSubnetName
-}
+//@description('Reference to existing subnet created in vnet.bicep')
+//resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
+//  name: internalResourcesSubnetName
+//}
 
 @description('Name of the key vault')
 param keyVaultName string
@@ -108,10 +108,10 @@ resource server 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
       iops: storageIops
       autoGrow: storageAutogrow
     }
-    network: {
-      delegatedSubnetResourceId: subnet.id
-      publicNetworkAccess: (vnet ? 'Disabled' : 'Enabled')
-    }
+    //network: {
+      //delegatedSubnetResourceId: subnet.id
+      // publicNetworkAccess: (vnet ? 'Disabled' : 'Enabled')
+    //}
     backup: {
       backupRetentionDays: backupRetentionDays
       geoRedundantBackup: geoRedundantBackup
