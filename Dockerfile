@@ -10,5 +10,5 @@ RUN apt-get update && apt-get install -y wget --no-install-recommends \
 RUN wget --progress=dot:giga https://cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem -P /opt/certificates/
 
 USER 1001
-EXPOSE 80
+EXPOSE 8000
 ENTRYPOINT ["/opt/CTFd/docker-entrypoint.sh"]
