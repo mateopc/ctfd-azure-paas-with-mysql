@@ -14,7 +14,7 @@ param administratorLogin string
 param administratorLoginPassword string
 
 @description('Firewall rules')
-resource allowAllWindowsAzureIps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = if (!vnet) {
+resource allowAllWindowsAzureIps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = {
     name: 'AllowAllWindowsAzureIps'
     properties: {
       startIpAddress: '0.0.0.0'
@@ -119,19 +119,6 @@ resource database 'Microsoft.DBforMySQL/flexibleServers/databases@2021-12-01-pre
   properties: {
     charset: 'utf8'
     collation: 'utf8_general_ci'
-  }
-}
-
-module privateEndpointModule 'privateendpoint.bicep' = if (vnet) {
-  name: 'MySQLPrivateEndpointDeploy'
-  params: {
-    virtualNetworkName: virtualNetworkName
-    subnetName: internalResourcesSubnetName
-    resuorceId: server.id
-    resuorceGroupId: 'mySQLServer'
-    privateDnsZoneName: 'privatelink.mysql.database.azure.com'
-    privateEndpointName: 'mysql_private_endpoint'
-    location: location
   }
 }
 
