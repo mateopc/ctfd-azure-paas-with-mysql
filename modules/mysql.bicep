@@ -13,6 +13,14 @@ param administratorLogin string
 @secure()
 param administratorLoginPassword string
 
+@description('Firewall rules')
+resource allowAllWindowsAzureIps 'firewallRules@2018-06-01' = if (!vnet) {
+    name: 'AllowAllWindowsAzureIps'
+    properties: {
+      startIpAddress: '0.0.0.0'
+      endIpAddress: '0.0.0.0'
+    }
+
 @description('Provide the tier of the specific SKU. High availability is available only in the GeneralPurpose and MemoryOptimized SKUs.')
 @allowed([
   'Burstable'
@@ -66,17 +74,6 @@ var serverName = 'ctfd-mysqlserver-${uniqueString(resourceGroup().id)}'
 @description('Database Name for Azure database for MySQL')
 var databaseName = 'ctfd-mysqldb-${uniqueString(resourceGroup().id)}'
 
-@description('Name of the VNet')
-param virtualNetworkName string
-
-@description('Name of the internal resources subnet')
-param internalResourcesSubnetName string
-
-//@description('Reference to existing subnet created in vnet.bicep')
-//resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
-//  name: internalResourcesSubnetName
-//}
-
 @description('Name of the key vault')
 param keyVaultName string
 
@@ -108,10 +105,6 @@ resource server 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
       iops: storageIops
       autoGrow: storageAutogrow
     }
-    //network: {
-      //delegatedSubnetResourceId: subnet.id
-      // publicNetworkAccess: (vnet ? 'Disabled' : 'Enabled')
-    //}
     backup: {
       backupRetentionDays: backupRetentionDays
       geoRedundantBackup: geoRedundantBackup
@@ -123,8 +116,8 @@ resource database 'Microsoft.DBforMySQL/flexibleServers/databases@2021-12-01-pre
   parent: server
   name: databaseName
   properties: {
-    charset: 'utf8mb4'
-    collation: 'utf8mb4_general_ci'
+    charset: 'utf8'
+    collation: 'utf8_general_ci'
   }
 }
 
