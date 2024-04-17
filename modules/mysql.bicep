@@ -15,7 +15,7 @@ param administratorLoginPassword string
 
 @description('Firewall rules')
 resource allowAllWindowsAzureIps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = {
-    name: 'AllowAllWindowsAzureIps'
+    name: 'AllowAllWindowsAzureIps/rule1'
     properties: {
       startIpAddress: '0.0.0.0'
       endIpAddress: '0.0.0.0'
