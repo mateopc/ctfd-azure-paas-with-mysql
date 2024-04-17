@@ -20,6 +20,7 @@ resource allowAllWindowsAzureIps 'firewallRules@2018-06-01' = if (!vnet) {
       startIpAddress: '0.0.0.0'
       endIpAddress: '0.0.0.0'
     }
+}
 
 @description('Provide the tier of the specific SKU. High availability is available only in the GeneralPurpose and MemoryOptimized SKUs.')
 @allowed([
