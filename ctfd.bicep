@@ -180,8 +180,6 @@ module mySQLModule 'modules/mysql.bicep' = {
   params: {
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    internalResourcesSubnetName: internalResourcesSubnetName
-    virtualNetworkName: virtualNetworkName
     location: resourcesLocation
     vnet: vnet
     ctfDbSecretName: ctfDatabaseSecretName
