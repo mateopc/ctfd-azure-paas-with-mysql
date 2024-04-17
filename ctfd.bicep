@@ -8,7 +8,7 @@ param virtualNetworkCIDR string = '10.200.0.0/16'
 param publicResourcesSubnetCIDR string = '10.200.1.0/26'
 
 @description('Deploy with VNet')
-param vnet bool = true
+param vnet bool = false
 
 @description('SKU Name for Azure cache for Redis')
 @allowed([
