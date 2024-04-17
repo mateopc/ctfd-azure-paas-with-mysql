@@ -14,7 +14,7 @@ param administratorLogin string
 param administratorLoginPassword string
 
 @description('Firewall rules')
-resource allowAllWindowsAzureIps 'firewallRules@2018-06-01' = if (!vnet) {
+resource allowAllWindowsAzureIps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = if (!vnet) {
     name: 'AllowAllWindowsAzureIps'
     properties: {
       startIpAddress: '0.0.0.0'
